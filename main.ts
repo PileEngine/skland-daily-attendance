@@ -108,46 +108,52 @@ async function doAttendanceForAccount(token: string, options: Options) {
                     await serverChan(
                         options.withServerChan,
                         `【森空岛每日签到】`,
-                        messages.join('\n')
+                        messages.join('\n\n')
                     )
                 // quit with error
                 if (hasError) {
                     process.exit(1)
                 }
             }
-        return [logger, push] as const
+        const add = (message: string) => {
+            messages.push(message)
+        }
+        return [logger, push, add] as const
     }
 
-    const [combineMessage, excutePushMessage] = createCombinePushMessage()
+    const [combineMessage, excutePushMessage, addMessage] = createCombinePushMessage()
+
+
+    addMessage(`# 森空岛每日签到 \n\n> ${new Date().toLocaleDateString('zh-CN', { dateStyle: 'full', timeStyle: "short" })}`)
+    addMessage('## 森空岛各版面每日检票')
+    await Promise.all(SKLAND_BOARD_IDS.map(async (id) => {
+        const data = await checkIn(cred, signToken, id)
+        const name = SKLAND_BOARD_NAME_MAPPING[id]
+        if (data.message === 'OK' && data.code === 0) {
+            combineMessage(`版面【${name}】登岛检票成功`)
+        } else {
+            // 登岛检票 最后不会以错误结束进程
+            combineMessage(`版面【${name}】登岛检票失败, 错误信息: ${data.message}`)
+        }
+    }))
+
+    addMessage('## 明日方舟签到')
 
     const characterList = list.map(i => i.bindingList).flat()
-    await Promise.all(
-        [
-            characterList.map(async character => {
-                console.log('开始签到' + character.nickName);
-                const data = await attendance(cred, signToken, {
-                    uid: character.uid,
-                    gameId: character.channelMasterId
-                })
-                if (data.code === 0 && data.message === 'OK') {
-                    const msg = `${character.nickName}签到成功, 获得了${data.data.awards.map(a => a.resource.name + '' + a.count + '个').join(',')}`
-                    combineMessage(msg)
-                } else {
-                    const msg = `${character.nickName}签到失败, 错误消息: ${data.message} raw response json: ${JSON.stringify(data)}`
-                    combineMessage(msg, true)
-                }
-            }),
-            ...SKLAND_BOARD_IDS.map(async (id) => {
-                const data = await checkIn(cred, signToken, id)
-                const name = SKLAND_BOARD_NAME_MAPPING[id]
-                if (data.message === 'OK' && data.code === 0) {
-                    combineMessage(`版面【${name}】登岛检票成功`)
-                } else {
-                    combineMessage(`版面【${name}】登岛检票失败, 错误信息: ${data.message}`)
-                }
-            })
-        ],
-    )
+    await Promise.all(characterList.map(async character => {
+        console.log('开始签到' + character.nickName);
+        const data = await attendance(cred, signToken, {
+            uid: character.uid,
+            gameId: character.channelMasterId
+        })
+        if (data.code === 0 && data.message === 'OK') {
+            const msg = `角色${character.nickName}签到成功, 获得了${data.data.awards.map(a => a.resource.name + '' + a.count + '个').join(',')}`
+            combineMessage(msg)
+        } else {
+            const msg = `角色${character.nickName}签到失败, 错误消息: ${data.message}\n\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\` `
+            combineMessage(msg, true)
+        }
+    }))
 
     await excutePushMessage()
 }
