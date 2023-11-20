@@ -34,7 +34,6 @@ export async function serverChan(sendkey: string, title: string, content: string
     }
 }
 
-// TODO BarkKey, BarkServer
 export async function bark(url: string, title: string, content: string) {
     if (typeof url !== 'string' || !url.startsWith("https://")) {
         console.error("Wrong type for Bark URL.");
