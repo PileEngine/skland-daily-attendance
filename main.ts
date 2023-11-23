@@ -150,7 +150,7 @@ async function doAttendanceForAccount(token: string, options: Options) {
 
     const characterList = list.map(i => i.bindingList).flat()
     await Promise.all(characterList.map(async character => {
-        if (!options.selectAttendanceChannel || options.selectAttendanceChannel === '0' || options.selectAttendanceChannel === character.channelMasterId) {
+        if (options.selectAttendanceChannel === '0' || options.selectAttendanceChannel === character.channelMasterId) {
             console.log('开始签到' + character.nickName);
             const data = await attendance(cred, signToken, {
                 uid: character.uid,
@@ -174,6 +174,6 @@ assert(typeof process.env.SKLAND_TOKEN === 'string')
 const accounts = Array.from(process.env.SKLAND_TOKEN.split(','))
 const withServerChan = process.env.SERVERCHAN_SENDKEY
 const withBark = process.env.BARK_URL
-const selectAttendanceChannel = process.env.SELECT_CHANNEL
+const selectAttendanceChannel = process.env.SELECT_CHANNEL || '0'
 
 await Promise.all(accounts.map(token => doAttendanceForAccount(token, { withServerChan, withBark, selectAttendanceChannel })))
