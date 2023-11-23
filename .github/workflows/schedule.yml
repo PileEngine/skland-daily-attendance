@@ -46,3 +46,4 @@ jobs:
           SKLAND_TOKEN: ${{ secrets.SKLAND_TOKEN }}
           SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
           BARK_URL: ${{ secrets.BARK_URL }}
+          SELECT_CHANNEL: ${{ secrets.SELECT_CHANNEL }}

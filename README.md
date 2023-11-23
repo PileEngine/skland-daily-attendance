@@ -28,12 +28,12 @@
 <details>
   <summary>最终可能有的 secrets 如下</summary>
 
-| Name               | Secret                 |
-| ------------------ | ---------------------- |
-| SKLAND_TOKEN *     | 森空岛 token           |
-| SERVERCHAN_SENDKEY | Server酱推送密钥，可选 |
-| BARK_URL           | Bark 推送地址，可选    |
-
+| Name               | Secret                                                           |
+| ------------------ | ---------------------------------------------------------------- |
+| SKLAND_TOKEN \*    | 森空岛 token <br>多账号使用半角逗号`,`分割                        |
+| SERVERCHAN_SENDKEY | Server 酱推送密钥，可选                                          |
+| BARK_URL           | Bark 推送地址，可选                                              |
+| SELECT_CHANNEL     | 明日方舟签到区服选择，可选<br>无或 `0` 为全部，`1` 为官服，`2` 为 B 服 |
 </details>
 
 ### 启动 Github Action

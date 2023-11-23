@@ -88,6 +88,7 @@ interface Options {
     withServerChan?: false | string,
     /** bark 推送功能的启用，false 或者 bark 的 URL */
     withBark?: false | string,
+    selectAttendanceChannel?: false | string,
 }
 
 async function doAttendanceForAccount(token: string, options: Options) {
@@ -149,19 +150,21 @@ async function doAttendanceForAccount(token: string, options: Options) {
 
     const characterList = list.map(i => i.bindingList).flat()
     await Promise.all(characterList.map(async character => {
-        console.log('开始签到' + character.nickName);
-        const data = await attendance(cred, signToken, {
-            uid: character.uid,
-            gameId: character.channelMasterId
-        })
-        if (data.code === 0 && data.message === 'OK') {
-            const msg = `角色${character.nickName}签到成功, 获得了${data.data.awards.map(a => '「' + a.resource.name + '」' + a.count + '个').join(',')}`
-            combineMessage(msg)
-        } else {
-            const msg = `角色${character.nickName}签到失败, 错误消息: ${data.message}\n\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\` `
-            combineMessage(msg, true)
+        if (!options.selectAttendanceChannel || options.selectAttendanceChannel === '0' || options.selectAttendanceChannel === character.channelMasterId) {
+            console.log('开始签到' + character.nickName);
+            const data = await attendance(cred, signToken, {
+                uid: character.uid,
+                gameId: character.channelMasterId
+            });
+            if (data.code === 0 && data.message === 'OK') {
+                const msg = `${character.channelName.toUpperCase()}角色 ${character.nickName} 签到成功, 获得了${data.data.awards.map(a => '「' + a.resource.name + '」' + a.count + '个').join(',')}`;
+                combineMessage(msg);
+            } else {
+                const msg = `${character.channelName.toUpperCase()}角色 ${character.nickName} 签到失败, 错误消息: ${data.message}\n\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\` `;
+                combineMessage(msg, true);
+            }
         }
-    }))
+    }));
 
     await excutePushMessage()
 }
@@ -171,5 +174,6 @@ assert(typeof process.env.SKLAND_TOKEN === 'string')
 const accounts = Array.from(process.env.SKLAND_TOKEN.split(','))
 const withServerChan = process.env.SERVERCHAN_SENDKEY
 const withBark = process.env.BARK_URL
+const selectAttendanceChannel = process.env.SELECT_CHANNEL
 
-await Promise.all(accounts.map(token => doAttendanceForAccount(token, { withServerChan, withBark })))
+await Promise.all(accounts.map(token => doAttendanceForAccount(token, { withServerChan, withBark, selectAttendanceChannel })))
