@@ -149,6 +149,7 @@ async function doAttendanceForAccount(token: string, options: Options) {
 
     addMessage('## 明日方舟签到')
     let successAttendence = 0;
+    console.log(`SELECT_CHANNEL: ${options.selectAttendanceChannel}\nHIDE_NAME: ${options.hideName}`)
     const characterList = list.map(i => i.bindingList).flat()
     await Promise.all(characterList.map(async character => {
         if (options.selectAttendanceChannel === '0' || options.selectAttendanceChannel === character.channelMasterId) {
