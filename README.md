@@ -34,7 +34,7 @@
 | SERVERCHAN_SENDKEY | Server 酱推送密钥，可选                                          |
 | BARK_URL           | Bark 推送地址，可选                                              |
 | SELECT_CHANNEL     | 明日方舟签到区服选择，可选<br>无或 `0` 为全部，`1` 为官服，`2` 为 B 服 |
-| HIDE_NAME          | 隐藏 Actions 日志和推送中的角色名，可选<br>无或 `0` 为关，`1` 为开    |
+| HIDE_NAME          | 隐藏 Actions 日志中的角色名，可选<br>输入自己的角色名即可，例：逸逸#4514|
 </details>
 
 ### 启动 Github Action
