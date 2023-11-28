@@ -88,6 +88,7 @@ interface Options {
     withServerChan?: false | string,
     /** bark 推送功能的启用，false 或者 bark 的 URL */
     withBark?: false | string,
+    selectAttendanceChannel?: false | string,
 }
 
 async function doAttendanceForAccount(token: string, options: Options) {
@@ -146,23 +147,26 @@ async function doAttendanceForAccount(token: string, options: Options) {
     }))
 
     addMessage('## 明日方舟签到')
-
+    let successAttendence = 0;
     const characterList = list.map(i => i.bindingList).flat()
     await Promise.all(characterList.map(async character => {
-        console.log('开始签到' + character.nickName);
-        const data = await attendance(cred, signToken, {
-            uid: character.uid,
-            gameId: character.channelMasterId
-        })
-        if (data.code === 0 && data.message === 'OK') {
-            const msg = `角色${character.nickName}签到成功, 获得了${data.data.awards.map(a => '「' + a.resource.name + '」' + a.count + '个').join(',')}`
-            combineMessage(msg)
-        } else {
-            const msg = `角色${character.nickName}签到失败, 错误消息: ${data.message}\n\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\` `
-            combineMessage(msg, true)
+        if (options.selectAttendanceChannel === '0' || options.selectAttendanceChannel === character.channelMasterId) {
+            const data = await attendance(cred, signToken, {
+                uid: character.uid,
+                gameId: character.channelMasterId
+            });
+            console.log(`将签到第${successAttendence + 1}个角色`);
+            if (data.code === 0 && data.message === 'OK') {
+                const msg = `${(Number(character.channelMasterId) - 1) ? 'B 服' : '官服'}角色 ${character.nickName} 签到成功${', 获得了' + data.data.awards.map(a => '「' + a.resource.name + '」' + a.count + '个').join(',')}`;
+                combineMessage(msg);
+                successAttendence++;
+            } else {
+                const msg = `${(Number(character.channelMasterId) - 1) ? 'B 服' : '官服'}角色 ${character.nickName} 签到失败${`, 错误消息: ${data.message}\n\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``}`;
+                combineMessage(msg, true);
+            }
         }
-    }))
-
+    }));
+    combineMessage(`成功签到${successAttendence}个角色`)
     await excutePushMessage()
 }
 
@@ -171,5 +175,6 @@ assert(typeof process.env.SKLAND_TOKEN === 'string')
 const accounts = Array.from(process.env.SKLAND_TOKEN.split(','))
 const withServerChan = process.env.SERVERCHAN_SENDKEY
 const withBark = process.env.BARK_URL
+const selectAttendanceChannel = process.env.SELECT_CHANNEL || '0'
 
-await Promise.all(accounts.map(token => doAttendanceForAccount(token, { withServerChan, withBark })))
+await Promise.all(accounts.map(token => doAttendanceForAccount(token, { withServerChan, withBark, selectAttendanceChannel })))
