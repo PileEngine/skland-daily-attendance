@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "main.ts",

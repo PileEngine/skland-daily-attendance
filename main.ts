@@ -1,6 +1,7 @@
-import assert from 'assert'
+import assert from 'node:assert'
 import 'dotenv/config'
-import { doAttendanceForAccount } from "./src"
+import process from 'node:process'
+import { doAttendanceForAccount } from './src'
 
 assert(typeof process.env.SKLAND_TOKEN === 'string')
 

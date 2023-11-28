@@ -1,23 +1,24 @@
 {
   "name": "skland-daily-attendance",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "attendance": "tsx main.ts"
-  },
-  "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@antfu/eslint-config": "^2.1.1",
-    "@types/node": "^20.6.0",
-    "eslint": "^8.54.0",
-    "typescript": "^5.2.2"
+  "keywords": [],
+  "main": "index.js",
+  "scripts": {
+    "attendance": "tsx main.ts"
   },
   "dependencies": {
     "dotenv": "^16.3.1",
     "tsx": "^3.12.10"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^2.1.1",
+    "@types/eslint": "^8.44.7",
+    "@types/node": "^20.6.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.2.2"
   }
 }

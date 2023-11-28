@@ -1,44 +1,44 @@
 export interface SklandResponse<T> {
-  code: number,
+  code: number
   message: string
   data: T
 }
 
-export type AuthResponse = {
-  status: number,
+export interface AuthResponse {
+  status: number
   type: string
   msg: string
-  data?: { code: string; uid: string }
-} 
+  data?: { code: string, uid: string }
+}
 
-export type CredResponse = SklandResponse<{ cred: string; userId: string; token: string; }>
+export type CredResponse = SklandResponse<{ cred: string, userId: string, token: string }>
 
 export type BindingResponse = SklandResponse<{
   list: {
-      appCode: string
-      appName: string
-      bindingList: {
-          uid: string
-          isOfficial: boolean,
-          isDefault: boolean,
-          channelMasterId: string,
-          channelName: string
-          nickName: string
-          isDelete: boolean
-      }[],
-      defaultUid: string
+    appCode: string
+    appName: string
+    bindingList: {
+      uid: string
+      isOfficial: boolean
+      isDefault: boolean
+      channelMasterId: string
+      channelName: string
+      nickName: string
+      isDelete: boolean
+    }[]
+    defaultUid: string
   }[]
 }>
 
 export type AttendanceResponse = SklandResponse<{
-  ts: number,
+  ts: number
   awards: {
-      resource: {
-          id: string,
-          name: string,
-          type: string
-      },
-      count: number
+    resource: {
+      id: string
+      name: string
+      type: string
+    }
+    count: number
   }[]
 }>
 
@@ -53,5 +53,5 @@ export enum SklandBoard {
   /** 泡姆泡姆 */
   Popucom = 4,
   /** 纳斯特港 */
-  Neste = 100
+  Neste = 100,
 }
