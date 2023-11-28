@@ -11,14 +11,14 @@ export async function serverChan(sendkey: string, title: string, content: string
   try {
     // const resp = await axios.post(`https://sctapi.ftqq.com/${sendkey}.send`, payload);
     const resp = await fetch(
-            `https://sctapi.ftqq.com/${sendkey}.send`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(payload),
-            },
+      `https://sctapi.ftqq.com/${sendkey}.send`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      },
     )
     const data = await resp.json()
     if (data.code === 0) {
