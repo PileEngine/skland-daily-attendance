@@ -1,6 +1,6 @@
 # 森空岛签到
 
-使用 github action 定时执行森空岛签到
+使用 github action 定时执行森空岛各版面登岛检票和明日方舟每日签到任务
 
 ## 使用
 
@@ -14,9 +14,26 @@
 
 ### 添加 Cookie 至 Secrets
 
-回到项目页面，依次点击 Settings--> Secrets -->New secret
+点击Settings -> 点击选项卡 Secrets and variables -> 点击Actions -> New repository secret
 
 建立名为 `SKLAND_TOKEN` 的 secret，值为上一步获取 content，最后点击 Add secret，如果需要多账号支持，请使用半角逗号`,`分割
+
+#### 推送服务
+
+- 支持 server 酱推送每日签到信息，建立名为 `SERVERCHAN_SENDKEY` 的 secret 填入你 server 酱的推送密钥
+
+- 支持 bark 推送每日签到信息，建立名为 `BARK_URL` 的 secret 填入你 bark 的推送地址，例如 `https://api.day.app/xxxxxxxxxx/`，支持自建服务器
+
+
+<details>
+  <summary>最终可能有的 secrets 如下</summary>
+
+| Name               | Secret                                                           |
+| ------------------ | ---------------------------------------------------------------- |
+| SKLAND_TOKEN \*    | 森空岛 token <br>多账号使用半角逗号`,`分割                        |
+| SERVERCHAN_SENDKEY | Server 酱推送密钥，可选                                          |
+| BARK_URL           | Bark 推送地址，可选                                              |
+</details>
 
 ### 启动 Github Action
 
