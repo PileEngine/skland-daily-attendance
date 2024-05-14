@@ -41,7 +41,7 @@ jobs:
         
       - name: Set up random delay
         id: random-delay
-        run: echo "Random delay generated" && echo "DELAY=$((RANDOM % 60))" >> $GITHUB_ENV
+        run: echo "Random delay generated" && echo "DELAY=$((RANDOM % 86400))" >> $GITHUB_ENV
       
       - name: Wait for random time
         run: sleep $DELAY
