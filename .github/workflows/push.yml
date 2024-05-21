@@ -1,0 +1,20 @@
+on: 
+  push:
+    branches: 
+      - master
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout blog code 
+      uses: actions/checkout@v2.0.0
+        
+    - name: Build and Deploy
+      uses:  Forest10/hexo-deploy-action-with-cname@v1.0.0
+      env:
+        USER_NAME: your name # optional
+        EMAIL: your email # optional
+        PERSONAL_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        PUBLISH_REPOSITORY: your.github.io # The repository the action should deploy to.
+        BRANCH: master  # The branch the action should deploy to.
+        PUBLISH_DIR: ./public # The folder the action should deploy.
