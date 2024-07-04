@@ -47,4 +47,4 @@
 
 ## ~~广告~~
 
-推荐一款浏览器扩展——[罗德岛远程指挥部](https://github.com/enpitsuLin/rhodes-headquarters) 能在浏览器上监控博士您岛上的最新信息
+推荐一款浏览器扩展——[罗德岛远程指挥部](https://github.com/enpitsuLin/rhodes-headquarters) 能在浏览器上监控博士您岛上的最新信息。
