@@ -25,7 +25,7 @@ export async function doAttendanceForAccount(token: string, options: Options) {
         hasError = true
     }
     const push
-      = async () => {
+      = async (hasSuccessfulAttendance : boolean) => {        
         if (options.withServerChan) {
           await serverChan(
             options.withServerChan,
@@ -33,12 +33,21 @@ export async function doAttendanceForAccount(token: string, options: Options) {
             messages.join('\n\n'),
           )
         }
-        if (options.withBark) {
-          await bark(
-            options.withBark,
-            `【森空岛每日签到】`,
-            messages.join('\n\n'),
-          )
+        if (options.withBark) {                  
+          if (hasSuccessfulAttendance) {
+             await bark(
+                options.withBark,
+                `【森空岛每日签到 成功】`,
+                messages.join('\n\n'), 
+            )
+          } else {
+              await bark(
+                options.withBark,
+                `【森空岛每日签到 失败】`,
+                messages.join('\n\n'),
+            )
+          }
+         
         }
         // quit with error
         if (hasError)
@@ -52,21 +61,21 @@ export async function doAttendanceForAccount(token: string, options: Options) {
 
   const [combineMessage, excutePushMessage, addMessage] = createCombinePushMessage()
 
-  addMessage(`# 森空岛每日签到 \n\n> ${new Intl.DateTimeFormat('zh-CN', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Asia/Shanghai' }).format(new Date())}`)
-  addMessage('## 森空岛各版面每日检票')
+  // addMessage(`# 森空岛每日签到 \n\n> ${new Intl.DateTimeFormat('zh-CN', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Asia/Shanghai' }).format(new Date())}`)
+  // addMessage('## 森空岛各版面每日检票')
   await Promise.all(SKLAND_BOARD_IDS.map(async (id) => {
     const data = await checkIn(cred, signToken, id)
     const name = SKLAND_BOARD_NAME_MAPPING[id]
     if (data.message === 'OK' && data.code === 0) {
-      combineMessage(`版面【${name}】登岛检票成功`)
+      // combineMessage(`版面【${name}】登岛检票成功`)
     }
     else {
       // 登岛检票 最后不会以错误结束进程
-      combineMessage(`版面【${name}】登岛检票失败, 错误信息: ${data.message}`)
+      // combineMessage(`版面【${name}】登岛检票失败, 错误信息: ${data.message}`)
     }
   }))
 
-  addMessage('## 明日方舟签到')
+  // addMessage('## 明日方舟签到')
   let successAttendance = 0
   const characterList = list.map(i => i.bindingList).flat()
   await Promise.all(characterList.map(async (character) => {
@@ -85,6 +94,6 @@ export async function doAttendanceForAccount(token: string, options: Options) {
       combineMessage(msg, true)
     }
   }))
-  combineMessage(`成功签到${successAttendance}个角色`)
-  await excutePushMessage()
+  combineMessage(`成功签到${successAttendance}个角色`)           
+  await excutePushMessage(successAttendance > 0)
 }
