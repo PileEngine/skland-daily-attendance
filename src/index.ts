@@ -40,12 +40,21 @@ export async function doAttendanceForAccount(token: string, options: Options) {
                 `【森空岛每日签到 成功】`,
                 messages.join('\n\n'), 
             )
-          } else {
-              await bark(
-                options.withBark,
-                `【森空岛每日签到 失败】`,
-                messages.join('\n\n'),
-            )
+          } else {   
+              
+              for (const message of messages) {
+                if (message.includes("请勿重复签到")) {  
+                  hasError = false
+                }
+              }
+
+              if (hasError) {
+                  await bark(    
+                    options.withBark,
+                    `【森空岛每日签到 失败】`,
+                    messages.join('\n\n'),
+                  )
+              }
           }
          
         }
