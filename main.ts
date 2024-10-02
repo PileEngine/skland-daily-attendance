@@ -2,7 +2,6 @@ import assert from 'node:assert'
 import 'dotenv/config'
 import process from 'node:process'
 import { doAttendanceForAccount } from './src'
-import { createDeviceId } from './src/utils'
 
 assert(typeof process.env.SKLAND_TOKEN === 'string')
 
@@ -11,4 +10,3 @@ const withServerChan = process.env.SERVERCHAN_SENDKEY
 const withBark = process.env.BARK_URL
 
 await Promise.all(accounts.map(token => doAttendanceForAccount(token, { withServerChan, withBark })))
- 
