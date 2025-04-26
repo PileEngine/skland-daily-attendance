@@ -26,10 +26,10 @@ jobs:
           git remote add upstream https://github.com/enpitsuLin/skland-daily-attendance.git
           git fetch upstream
 
-      - name: Reset to upstream/master (exclude workflows)
+      - name: Reset to upstream/main (exclude workflows)
         run: |
-          git checkout master
-          git reset --hard upstream/master
+          git checkout main
+          git reset --hard upstream/main
 
           # 避免覆盖 workflows 文件，手动还原
           git restore --staged .github/workflows || true
