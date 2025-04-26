@@ -1,12 +1,14 @@
-name: Sync with Upstream
+name: Sync with Upstream (without workflows)
 
 on:
-  workflow_dispatch:      # 手动触发
-
+  workflow_dispatch:       # 支持手动触发
+  schedule:
+    - cron: '0 3 * * *'    # 每天凌晨 3 点 UTC 自动触发（可调）
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout your repo
         uses: actions/checkout@v3
@@ -16,20 +18,22 @@ jobs:
 
       - name: Set up Git
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Add upstream remote
+      - name: Add upstream and fetch
         run: |
           git remote add upstream https://github.com/enpitsuLin/skland-daily-attendance.git
           git fetch upstream
 
-      - name: Reset to upstream
+      - name: Sync code from upstream/main (exclude workflows)
         run: |
           git checkout main
           git reset --hard upstream/main
+          git restore --staged .github/workflows
+          git checkout HEAD -- .github/workflows
 
-      - name: Push to your repo
+      - name: Push changes (code only)
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
