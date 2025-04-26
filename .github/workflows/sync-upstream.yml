@@ -1,7 +1,7 @@
-name: Sync with Upstream (safe, no workflow overwrite)
+name: Sync From Another Repo
 
 on:
-  workflow_dispatch:       # 支持手动触发
+  workflow_dispatch: # 可以手动触发
 
 
 jobs:
@@ -9,37 +9,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout your repo
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-          fetch-depth: 0
+      - name: Checkout current repo
+        uses: actions/checkout@v4
 
-      - name: Set up Git identity
+      - name: Clone upstream repo
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git clone --depth=1 https://github.com/enpitsuLin/skland-daily-attendance.git upstream-repo
+          
+          # 删除 .github 文件夹以避免同步它
+          rm -rf upstream-repo/.github
+          
+          # 清除当前仓库的所有文件（包括隐藏文件），除了 .git 目录
+          shopt -s extglob
+          rm -rf !(.git)
 
-      - name: Add upstream and fetch
+          # 拷贝文件过来
+          cp -r upstream-repo/* .
+          cp -r upstream-repo/.* . 2>/dev/null || true
+
+      - name: Push changes
         run: |
-          git remote add upstream https://github.com/enpitsuLin/skland-daily-attendance.git
-          git fetch upstream
-
-      - name: Reset to upstream/main (exclude workflows)
-        run: |
-          git checkout main
-          git reset --hard upstream/main
-
-          # 避免覆盖 workflows 文件，手动还原
-          git restore --staged .github/workflows || true
-          git checkout HEAD -- .github/workflows || true
-
-      - name: Commit if needed
-        run: |
-          git diff --quiet && echo "✅ Nothing to commit" || \
-          (git commit -am "🔄 Sync from upstream/master (excluding workflows)")
-
-      - name: Push changes to your repo
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git add -A
+          git commit -m "🔄 Sync from upstream repo (excluding .github)" || echo "No changes to commit"
+          git push origin HEAD
+        env:
+          GIT_AUTH_TOKEN: ${{ secrets.SYNC_TOKEN }}
