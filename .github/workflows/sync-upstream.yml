@@ -1,38 +1,49 @@
-name: Sync From Another Repo
+name: Sync From Upstream Repo
 
 on:
-  workflow_dispatch: # 可以手动触发
-
+  workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout current repo
+      - name: Checkout current repo (main branch)
         uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Clone upstream repo
+      - name: Clone upstream repo (main branch)
         run: |
-          git clone --depth=1 https://github.com/enpitsuLin/skland-daily-attendance.git upstream-repo
-          
-          # 删除 .github 文件夹以避免同步它
-          rm -rf upstream-repo/.github
-          
-          # 清除当前仓库的所有文件（包括隐藏文件），除了 .git 目录
-          shopt -s extglob
-          rm -rf !(.git)
+          git clone --depth=1 --branch=main https://${{ secrets.SYNC_TOKEN }}@github.com/enpitsuLin/skland-daily-attendance.git upstream-repo
 
-          # 拷贝文件过来
-          cp -r upstream-repo/* .
-          cp -r upstream-repo/.* . 2>/dev/null || true
+      - name: List files in cloned repo (debug)
+        run: ls -la upstream-repo
 
-      - name: Push changes
+      - name: Remove .github and copy files
+        run: |
+          if [ -d "upstream-repo" ] && [ "$(ls -A upstream-repo)" ]; then
+            rm -rf upstream-repo/.github
+            
+            # 清空当前 repo 除了 .git
+            shopt -s extglob
+            rm -rf !(.git)
+
+            # 拷贝所有文件（包括隐藏文件）
+            cp -r upstream-repo/* .
+            cp -r upstream-repo/.[!.]* . || true
+            cp -r upstream-repo/..?* . || true
+          else
+            echo "❌ 上游仓库克隆失败或内容为空"
+            exit 1
+          fi
+
+      - name: Push changes to main branch
         run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
           git add -A
-          git commit -m "🔄 Sync from upstream repo (excluding .github)" || echo "No changes to commit"
-          git push origin HEAD
+          git commit -m "🔄 Sync from upstream (excluding .github)" || echo "No changes"
+          git push origin main
         env:
           GIT_AUTH_TOKEN: ${{ secrets.SYNC_TOKEN }}
