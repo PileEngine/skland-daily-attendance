@@ -1,49 +1,52 @@
-name: Sync From Upstream Repo
+name: Sync from Other Repository
 
 on:
-  workflow_dispatch:
+  # 可以根据需要触发
+
+  workflow_dispatch:     # 允许手动触发
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout current repo (main branch)
+      - name: Checkout current repository
         uses: actions/checkout@v4
         with:
-          ref: main
-
-      - name: Clone upstream repo (main branch)
+          path: current-repo
+          
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          repository: enpitsuLin/skland-daily-attendance  # 替换为源仓库的 owner/repo-name
+          ref: main  # 指定要同步的分支
+          path: source-repo
+          token: ${{ secrets.SYNC_TOKEN }}  # 使用个人访问令牌以访问可能的私有仓库
+          
+      - name: Sync repositories excluding .github directory
         run: |
-          git clone --depth=1 --branch=main https://${{ secrets.SYNC_TOKEN }}@github.com/enpitsuLin/skland-daily-attendance.git upstream-repo
-
-      - name: List files in cloned repo (debug)
-        run: ls -la upstream-repo
-
-      - name: Remove .github and copy files
-        run: |
-          if [ -d "upstream-repo" ] && [ "$(ls -A upstream-repo)" ]; then
-            rm -rf upstream-repo/.github
-            
-            # 清空当前 repo 除了 .git
-            shopt -s extglob
-            rm -rf !(.git)
-
-            # 拷贝所有文件（包括隐藏文件）
-            cp -r upstream-repo/* .
-            cp -r upstream-repo/.[!.]* . || true
-            cp -r upstream-repo/..?* . || true
+          cd source-repo
+          # 创建一个临时目录用于存放要同步的文件
+          mkdir -p ../temp-files
+          
+          # 复制除.github目录外的所有文件到临时目录
+          rsync -av --exclude='.git' --exclude='.github' ./ ../temp-files/
+          
+          # 将临时目录中的文件复制到当前仓库
+          rsync -av ../temp-files/ ../current-repo/
+          
+          cd ../current-repo
+          
+          # 设置 Git 用户
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          
+          # 添加、提交并推送更改
+          git add .
+          
+          # 检查是否有变更需要提交
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
           else
-            echo "❌ 上游仓库克隆失败或内容为空"
-            exit 1
+            git commit -m "Sync from source repository"
+            git push
           fi
-
-      - name: Push changes to main branch
-        run: |
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
-          git add -A
-          git commit -m "🔄 Sync from upstream (excluding .github)" || echo "No changes"
-          git push origin main
-        env:
-          GIT_AUTH_TOKEN: ${{ secrets.SYNC_TOKEN }}
