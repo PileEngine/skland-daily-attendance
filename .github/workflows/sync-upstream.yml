@@ -1,9 +1,9 @@
-name: Sync with Upstream (without workflows)
+name: Sync with Upstream (safe, no workflow overwrite)
 
 on:
   workflow_dispatch:       # 支持手动触发
   schedule:
-    - cron: '0 3 * * *'    # 每天凌晨 3 点 UTC 自动触发（可调）
+    - cron: '0 3 * * *'    # 每天凌晨 3 点 UTC 自动运行
 
 jobs:
   sync:
@@ -16,7 +16,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Set up Git
+      - name: Set up Git identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -26,14 +26,21 @@ jobs:
           git remote add upstream https://github.com/enpitsuLin/skland-daily-attendance.git
           git fetch upstream
 
-      - name: Sync code from upstream/main (exclude workflows)
+      - name: Reset to upstream/master (exclude workflows)
         run: |
-          git checkout main
-          git reset --hard upstream/main
-          git restore --staged .github/workflows
-          git checkout HEAD -- .github/workflows
+          git checkout master
+          git reset --hard upstream/master
 
-      - name: Push changes (code only)
+          # 避免覆盖 workflows 文件，手动还原
+          git restore --staged .github/workflows || true
+          git checkout HEAD -- .github/workflows || true
+
+      - name: Commit if needed
+        run: |
+          git diff --quiet && echo "✅ Nothing to commit" || \
+          (git commit -am "🔄 Sync from upstream/master (excluding workflows)")
+
+      - name: Push changes to your repo
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
